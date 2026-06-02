@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2d5a1b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TernakKu">
+<title>TernakKu</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --green:#2d5a1b;--green-mid:#4a8c2a;--green-light:#7ec850;--green-pale:#d4edba;
+  --amber:#c87d0e;--amber-pale:#fef3cc;
+  --red:#b83232;--red-pale:#fde8e8;
+  --blue:#1a5a8c;--blue-pale:#dceefb;
+  --bg:#f5f7f3;--card:#ffffff;--text:#1a2416;--muted:#6b7d63;--border:#dde8d5;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+h1,h2,h3{font-family:'Syne',sans-serif}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--green);color:#fff;padding:calc(var(--safe-top) + 14px) 20px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800}
+.topbar-sub{font-size:11px;opacity:.7;margin-top:1px}
+.topbar-icon{width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;border:none;color:#fff;cursor:pointer}
+.content{flex:1;padding:16px;padding-bottom:calc(80px + var(--safe-bottom))}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 0 calc(8px + var(--safe-bottom));display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;color:var(--muted);font-size:10px;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;padding:4px 0;transition:color .15s}
+.nav-item.active{color:var(--green)}
+.nav-icon{font-size:22px;line-height:1}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:var(--green-light);opacity:0;transition:opacity .15s}
+.nav-item.active .nav-dot{opacity:1}
+.screen{display:none}
+.screen.active{display:block}
+.card{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:16px;margin-bottom:12px}
+.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.metric-icon{font-size:22px;margin-bottom:6px}
+.metric-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--text);line-height:1}
+.metric-lbl{font-size:11px;color:var(--muted);margin-top:3px}
+.metric.g{background:var(--green);border-color:var(--green)}
+.metric.g .metric-val,.metric.g .metric-lbl,.metric.g .metric-icon{color:#fff}
+.metric.a{background:var(--amber);border-color:var(--amber)}
+.metric.a .metric-val,.metric.a .metric-lbl,.metric.a .metric-icon{color:#fff}
+.chart-wrap{position:relative;height:180px;margin-top:8px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);outline:none}
+.form-input:focus{border-color:var(--green)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-save{width:100%;padding:15px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;margin-top:4px}
+.btn-save:active{opacity:.85}
+.btn-outline{width:100%;padding:13px;background:none;color:var(--green);border:1.5px solid var(--green);border-radius:14px;font-size:15px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;margin-top:8px}
+.log-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.log-icon-box{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.log-body{flex:1;min-width:0}
+.log-name{font-size:14px;font-weight:600;color:var(--text)}
+.log-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.log-val{font-size:13px;font-weight:600;text-align:right;flex-shrink:0}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
+.badge-g{background:var(--green-pale);color:var(--green)}
+.badge-a{background:var(--amber-pale);color:var(--amber)}
+.badge-r{background:var(--red-pale);color:var(--red)}
+.badge-b{background:var(--blue-pale);color:var(--blue)}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-hdr h2{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.sec-hdr span{font-size:12px;color:var(--muted)}
+.tab-strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:16px;scrollbar-width:none}
+.tab-strip::-webkit-scrollbar{display:none}
+.tab-chip{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;font-weight:600;background:var(--card);color:var(--muted);cursor:pointer;white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif}
+.tab-chip.active{background:var(--green);color:#fff;border-color:var(--green)}
+#toast{position:fixed;bottom:calc(80px + var(--safe-bottom) + 12px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.report-hdr{background:var(--green);border-radius:16px;padding:20px;color:#fff;margin-bottom:12px}
+.report-hdr h3{font-size:22px;font-weight:800}
+.report-hdr p{font-size:13px;opacity:.8;margin-top:4px}
+.rrow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border)}
+.rrow:last-child{border-bottom:none}
+.rrow-l{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500}
+.rrow-r{font-size:14px;font-weight:700;color:var(--text)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+#install-banner{background:var(--green);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;display:none}
+#install-btn{margin-left:auto;background:var(--green-light);color:var(--text);border:none;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div id="install-banner">
+  <span>📲 Install TernakKu di home screen!</span>
+  <button id="install-btn">Install</button>
+  <button onclick="document.getElementById('install-banner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;margin-left:4px;font-size:16px">✕</button>
+</div>
+
+<div class="app">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🐔 TernakKu</div>
+      <div class="topbar-sub" id="topbar-date">–</div>
+    </div>
+    <button class="topbar-icon" onclick="showToast('Data tersimpan di perangkat ✓')">💾</button>
+  </div>
+
+  <div class="content">
+
+    <!-- BERANDA -->
+    <div id="screen-home" class="screen active">
+      <div class="sec-hdr"><h2>Beranda</h2><span id="home-date"></span></div>
+      <div class="metric-grid">
+        <div class="metric g"><div class="metric-icon">🥚</div><div class="metric-val" id="h-telur">0</div><div class="metric-lbl">Telur hari ini</div></div>
+        <div class="metric"><div class="metric-icon">🐔</div><div class="metric-val" id="h-ayam">0</div><div class="metric-lbl">Total ayam</div></div>
+        <div class="metric"><div class="metric-icon">🌾</div><div class="metric-val" id="h-pakan">0</div><div class="metric-lbl">Pakan (kg)</div></div>
+        <div class="metric a"><div class="metric-icon">💰</div><div class="metric-val" id="h-biaya">0</div><div class="metric-lbl">Biaya (rb Rp)</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 Produksi telur 7 hari</div>
+        <div class="chart-wrap"><canvas id="chartHome" role="img" aria-label="Grafik produksi telur 7 hari">Grafik produksi telur</canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ Aktivitas terbaru</div>
+        <div id="home-log"><div class="empty"><div class="empty-icon">📋</div><p>Belum ada aktivitas.<br>Mulai catat lewat menu Form.</p></div></div>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div id="screen-form" class="screen">
+      <div class="sec-hdr"><h2>Pencatatan</h2></div>
+      <div class="tab-strip">
+        <button class="tab-chip active" id="chip-kandang" onclick="switchFormTab('kandang')">🏠 Kandang</button>
+        <button class="tab-chip" id="chip-pakan" onclick="switchFormTab('pakan')">🌾 Pakan</button>
+        <button class="tab-chip" id="chip-produksi" onclick="switchFormTab('produksi')">🥚 Produksi</button>
+        <button class="tab-chip" id="chip-kesehatan" onclick="switchFormTab('kesehatan')">💊 Kesehatan</button>
+      </div>
+
+      <div id="ftab-kandang" class="card">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nama Kandang</label><input class="form-input" id="f-nama" type="text" placeholder="mis. Kandang A"></div>
+          <div class="form-group"><label class="form-label">Jenis Ayam</label><select class="form-input" id="f-jenis"><option>Broiler</option><option>Layer (Petelur)</option><option>Kampung</option><option>Joper</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Jumlah (ekor)</label><input class="form-input" id="f-jml" type="number" placeholder="0" min="0"></div>
+          <div class="form-group"><label class="form-label">Umur (hari)</label><input class="form-input" id="f-umur" type="number" placeholder="0" min="0"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Catatan</label><input class="form-input" id="f-cat-k" type="text" placeholder="Kondisi kandang..."></div>
+        <button class="btn-save" onclick="saveKandang()">Simpan Data Kandang</button>
+      </div>
+
+      <div id="ftab-pakan" class="card" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Tanggal</label><input class="form-input" id="f-tgl-p" type="date"></div>
+          <div class="form-group"><label class="form-label">Sesi</label><select class="form-input" id="f-sesi"><option>Pagi</option><option>Siang</option><option>Sore</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Jenis Pakan</label><select class="form-input" id="f-jpakan"><option>Konsentrat</option><option>Dedak</option><option>Jagung Giling</option><option>Pelet</option><option>Campuran</option></select></div>
+          <div class="form-group"><label class="form-label">Jumlah (kg)</label><input class="form-input" id="f-kg" type="number" step="0.5" placeholder="0" min="0"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Harga/kg (Rp)</label><input class="form-input" id="f-harga" type="number" placeholder="0" min="0"></div>
+          <div class="form-group"><label class="form-label">Total Biaya</label><input class="form-input" id="f-total" type="text" placeholder="Rp 0" readonly style="background:#f0f4ec"></div>
+        </div>
+        <button class="btn-save" onclick="savePakan()">Simpan Pakan</button>
+      </div>
+
+      <div id="ftab-produksi" class="card" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Tanggal</label><input class="form-input" id="f-tgl-pr" type="date"></div>
+          <div class="form-group"><label class="form-label">Jenis</label><select class="form-input" id="f-jpr" onchange="toggleProduksi()"><option>Telur</option><option>Berat Badan</option><option>Penjualan</option></select></div>
+        </div>
+        <div id="pr-telur">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Jumlah Telur</label><input class="form-input" id="f-telur" type="number" placeholder="0" min="0"></div>
+            <div class="form-group"><label class="form-label">Telur Rusak</label><input class="form-input" id="f-rusak" type="number" placeholder="0" min="0"></div>
+          </div>
+        </div>
+        <div id="pr-berat" style="display:none">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Berat rata-rata (g)</label><input class="form-input" id="f-berat" type="number" placeholder="0"></div>
+            <div class="form-group"><label class="form-label">Sampel (ekor)</label><input class="form-input" id="f-sampel" type="number" placeholder="5"></div>
+          </div>
+        </div>
+        <div id="pr-jual" style="display:none">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Jumlah (ekor)</label><input class="form-input" id="f-jual" type="number" placeholder="0"></div>
+            <div class="form-group"><label class="form-label">Harga/ekor (Rp)</label><input class="form-input" id="f-hjual" type="number" placeholder="0"></div>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Catatan</label><input class="form-input" id="f-cat-pr" type="text" placeholder="Keterangan..."></div>
+        <button class="btn-save" onclick="saveProduksi()">Simpan Produksi</button>
+      </div>
+
+      <div id="ftab-kesehatan" class="card" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Tanggal</label><input class="form-input" id="f-tgl-k" type="date"></div>
+          <div class="form-group"><label class="form-label">Kejadian</label><select class="form-input" id="f-kejadian"><option>Vaksinasi</option><option>Pengobatan</option><option>Kematian</option><option>Karantina</option><option>Pemeriksaan</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Jumlah (ekor)</label><input class="form-input" id="f-jk" type="number" placeholder="0" min="0"></div>
+          <div class="form-group"><label class="form-label">Nama Obat/Vaksin</label><input class="form-input" id="f-obat" type="text" placeholder="mis. ND La Sota"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Gejala / Keterangan</label><input class="form-input" id="f-gejala" type="text" placeholder="Gejala yang terlihat..."></div>
+        <div class="form-group"><label class="form-label">Biaya Penanganan (Rp)</label><input class="form-input" id="f-bk" type="number" placeholder="0" min="0"></div>
+        <button class="btn-save" onclick="saveKesehatan()">Simpan Kesehatan</button>
+      </div>
+    </div>
+
+    <!-- GRAFIK -->
+    <div id="screen-grafik" class="screen">
+      <div class="sec-hdr"><h2>Grafik</h2><span>7 hari terakhir</span></div>
+      <div class="card">
+        <div class="card-title">🥚 Produksi Telur</div>
+        <div class="chart-wrap"><canvas id="chartTelur" role="img" aria-label="Grafik produksi telur">Data telur</canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌾 Pemakaian Pakan (kg)</div>
+        <div class="chart-wrap"><canvas id="chartPakan" role="img" aria-label="Grafik pemakaian pakan">Data pakan</canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Biaya Harian (ribu Rp)</div>
+        <div class="chart-wrap"><canvas id="chartBiaya" role="img" aria-label="Grafik biaya harian">Data biaya</canvas></div>
+      </div>
+    </div>
+
+    <!-- LAPORAN -->
+    <div id="screen-laporan" class="screen">
+      <div class="sec-hdr"><h2>Laporan</h2></div>
+      <div class="report-hdr">
+        <h3>Ringkasan Mingguan</h3>
+        <p id="rpt-sub">7 hari terakhir</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Produksi</div>
+        <div class="rrow"><div class="rrow-l"><span>🥚</span> Total Telur</div><div class="rrow-r" id="rpt-telur">0 butir</div></div>
+        <div class="rrow"><div class="rrow-l"><span>📦</span> Rata-rata/hari</div><div class="rrow-r" id="rpt-avg">0 butir</div></div>
+        <div class="rrow"><div class="rrow-l"><span>💀</span> Kematian</div><div class="rrow-r" id="rpt-mati" style="color:var(--red)">0 ekor</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💸 Biaya</div>
+        <div class="rrow"><div class="rrow-l"><span>🌾</span> Biaya Pakan</div><div class="rrow-r" id="rpt-biaya-pakan">Rp 0</div></div>
+        <div class="rrow"><div class="rrow-l"><span>💊</span> Biaya Kesehatan</div><div class="rrow-r" id="rpt-biaya-sehat">Rp 0</div></div>
+        <div class="rrow"><div class="rrow-l"><span>💰</span> Total Pengeluaran</div><div class="rrow-r" id="rpt-total">Rp 0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Log Minggu Ini</div>
+        <div id="rpt-log-list"><div class="empty"><p>Belum ada data.</p></div></div>
+      </div>
+      <button class="btn-outline" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+    </div>
+
+  </div>
+
+  <nav class="bottomnav">
+    <button class="nav-item active" id="nav-home" onclick="goScreen('home','nav-home')">
+      <div class="nav-icon">🏠</div><div>Beranda</div><div class="nav-dot"></div>
+    </button>
+    <button class="nav-item" id="nav-form" onclick="goScreen('form','nav-form')">
+      <div class="nav-icon">📝</div><div>Form</div><div class="nav-dot"></div>
+    </button>
+    <button class="nav-item" id="nav-grafik" onclick="goScreen('grafik','nav-grafik')">
+      <div class="nav-icon">📊</div><div>Grafik</div><div class="nav-dot"></div>
+    </button>
+    <button class="nav-item" id="nav-laporan" onclick="goScreen('laporan','nav-laporan')">
+      <div class="nav-icon">📄</div><div>Laporan</div><div class="nav-dot"></div>
+    </button>
+  </nav>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var db = JSON.parse(localStorage.getItem('ternakku') || '{"logs":[],"kandang":{}}');
+var chartInstances = {};
+
+function saveDB() { localStorage.setItem('ternakku', JSON.stringify(db)); }
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+function last7Days() {
+  var days = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().split('T')[0]);
+  }
+  return days;
+}
+
+function fmtDate(ds) {
+  var d = new Date(ds + 'T00:00:00');
+  return d.toLocaleDateString('id-ID', {day:'numeric', month:'short'});
+}
+
+function fmtRp(n) {
+  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() { t.className = ''; }, 2500);
+}
+
+function goScreen(name, navId) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  var navItems = document.querySelectorAll('.nav-item');
+  for (var i = 0; i < navItems.length; i++) navItems[i].classList.remove('active');
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById(navId).classList.add('active');
+  if (name === 'home') renderHome();
+  if (name === 'grafik') renderCharts();
+  if (name === 'laporan') renderReport();
+}
+
+function switchFormTab(name) {
+  var tabs = ['kandang','pakan','produksi','kesehatan'];
+  for (var i = 0; i < tabs.length; i++) {
+    document.getElementById('ftab-' + tabs[i]).style.display = tabs[i] === name ? '' : 'none';
+    document.getElementById('chip-' + tabs[i]).className = 'tab-chip' + (tabs[i] === name ? ' active' : '');
+  }
+}
+
+function toggleProduksi() {
+  var v = document.getElementById('f-jpr').value;
+  document.getElementById('pr-telur').style.display = v === 'Telur' ? '' : 'none';
+  document.getElementById('pr-berat').style.display = v === 'Berat Badan' ? '' : 'none';
+  document.getElementById('pr-jual').style.display = v === 'Penjualan' ? '' : 'none';
+}
+
+function calcPakan() {
+  var kg = parseFloat(document.getElementById('f-kg').value) || 0;
+  var harga = parseFloat(document.getElementById('f-harga').value) || 0;
+  document.getElementById('f-total').value = fmtRp(kg * harga);
+}
+
+document.getElementById('f-kg').addEventListener('input', calcPakan);
+document.getElementById('f-harga').addEventListener('input', calcPakan);
+
+// Save functions
+function saveKandang() {
+  var nama = document.getElementById('f-nama').value || 'Kandang';
+  var jml = parseInt(document.getElementById('f-jml').value) || 0;
+  db.kandang = {
+    nama: nama,
+    jenis: document.getElementById('f-jenis').value,
+    jml: jml,
+    umur: parseInt(document.getElementById('f-umur').value) || 0
+  };
+  db.logs.unshift({type:'kandang', label:nama, sub:db.kandang.jenis, val:jml+' ekor', date:todayStr(), icon:'🏠', badge:'b'});
+  saveDB();
+  showToast('Kandang berhasil disimpan');
+  renderHome();
+}
+
+function savePakan() {
+  var kg = parseFloat(document.getElementById('f-kg').value) || 0;
+  var harga = parseFloat(document.getElementById('f-harga').value) || 0;
+  var total = kg * harga;
+  db.logs.unshift({
+    type: 'pakan',
+    label: document.getElementById('f-jpakan').value,
+    sub: document.getElementById('f-sesi').value,
+    val: kg + ' kg',
+    date: document.getElementById('f-tgl-p').value,
+    icon: '🌾',
+    badge: 'a',
+    biaya: total,
+    kg: kg
+  });
+  saveDB();
+  showToast('Pakan berhasil disimpan');
+}
+
+function saveProduksi() {
+  var jenis = document.getElementById('f-jpr').value;
+  var tgl = document.getElementById('f-tgl-pr').value;
+  var label, val, telur = 0;
+  if (jenis === 'Telur') {
+    telur = parseInt(document.getElementById('f-telur').value) || 0;
+    var rusak = parseInt(document.getElementById('f-rusak').value) || 0;
+    label = 'Telur';
+    val = telur + ' butir';
+    if (rusak > 0) val += ' (rusak: ' + rusak + ')';
+  } else if (jenis === 'Berat Badan') {
+    label = 'Berat Badan';
+    val = (document.getElementById('f-berat').value || '0') + ' gram';
+  } else {
+    label = 'Penjualan';
+    val = (document.getElementById('f-jual').value || '0') + ' ekor';
+  }
+  db.logs.unshift({type:'produksi', label:label, sub:jenis, val:val, date:tgl, icon:'🥚', badge:'g', telur:telur});
+  saveDB();
+  showToast('Produksi berhasil disimpan');
+}
+
+function saveKesehatan() {
+  var kejadian = document.getElementById('f-kejadian').value;
+  var jml = parseInt(document.getElementById('f-jk').value) || 0;
+  var obat = document.getElementById('f-obat').value || '-';
+  var biaya = parseFloat(document.getElementById('f-bk').value) || 0;
+  var tgl = document.getElementById('f-tgl-k').value;
+  var isMati = kejadian === 'Kematian';
+  db.logs.unshift({
+    type: 'kesehatan',
+    label: kejadian,
+    sub: obat,
+    val: jml + ' ekor',
+    date: tgl,
+    icon: isMati ? '💀' : '💊',
+    badge: isMati ? 'r' : 'g',
+    biaya: biaya,
+    mati: isMati ? jml : 0
+  });
+  saveDB();
+  showToast('Catatan kesehatan disimpan');
+}
+
+// Badge color helper
+function badgeBg(b) {
+  if (b === 'g') return 'var(--green-pale)';
+  if (b === 'a') return 'var(--amber-pale)';
+  if (b === 'r') return 'var(--red-pale)';
+  return 'var(--blue-pale)';
+}
+
+// Render log item HTML
+function logItemHtml(l) {
+  return '<div class="log-item">' +
+    '<div class="log-icon-box" style="background:' + badgeBg(l.badge) + '">' + l.icon + '</div>' +
+    '<div class="log-body">' +
+      '<div class="log-name">' + l.label + '</div>' +
+      '<div class="log-meta">' + l.sub + ' · ' + fmtDate(l.date) + '</div>' +
+    '</div>' +
+    '<div class="log-val"><span class="badge badge-' + l.badge + '">' + l.val + '</span></div>' +
+  '</div>';
+}
+
+// Render Home
+function renderHome() {
+  var t = todayStr();
+  var todayLogs = db.logs.filter(function(l) { return l.date === t; });
+  var telur = 0;
+  todayLogs.forEach(function(l) { if (l.type === 'produksi') telur += (l.telur || 0); });
+  var pakan = 0;
+  todayLogs.forEach(function(l) { if (l.type === 'pakan') pakan += (l.kg || 0); });
+  var biaya = 0;
+  todayLogs.forEach(function(l) { biaya += (l.biaya || 0); });
+
+  document.getElementById('h-telur').textContent = telur;
+  document.getElementById('h-ayam').textContent = db.kandang.jml || 0;
+  document.getElementById('h-pakan').textContent = pakan.toFixed(1);
+  document.getElementById('h-biaya').textContent = Math.round(biaya / 1000);
+
+  var hl = document.getElementById('home-log');
+  var recent = db.logs.slice(0, 5);
+  if (!recent.length) {
+    hl.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Belum ada aktivitas.<br>Mulai catat lewat menu Form.</p></div>';
+  } else {
+    var html = '';
+    for (var i = 0; i < recent.length; i++) html += logItemHtml(recent[i]);
+    hl.innerHTML = html;
+  }
+  renderHomeChart();
+}
+
+// Charts
+function makeChart(id, type, labels, datasets) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); }
+  var ctx = document.getElementById(id);
+  if (!ctx) return;
+  chartInstances[id] = new Chart(ctx, {
+    type: type,
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#6b7d63' } },
+        y: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { font: { size: 11 }, color: '#6b7d63' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function getWeekData(type, field) {
+  var days = last7Days();
+  return days.map(function(d) {
+    var sum = 0;
+    db.logs.forEach(function(l) {
+      if (l.date === d && l.type === type) sum += (l[field] || 0);
+    });
+    return sum;
+  });
+}
+
+function getDayLabels(short) {
+  return last7Days().map(function(d) {
+    var opts = short ? {weekday:'short'} : {weekday:'short', day:'numeric'};
+    return new Date(d + 'T00:00:00').toLocaleDateString('id-ID', opts);
+  });
+}
+
+function renderHomeChart() {
+  makeChart('chartHome', 'bar', getDayLabels(true),
+    [{ data: getWeekData('produksi', 'telur'), backgroundColor: '#4a8c2a', borderRadius: 6 }]);
+}
+
+function renderCharts() {
+  var labels = getDayLabels(false);
+  makeChart('chartTelur', 'bar', labels,
+    [{ data: getWeekData('produksi', 'telur'), backgroundColor: '#4a8c2a', borderRadius: 6 }]);
+  makeChart('chartPakan', 'line', labels,
+    [{ data: getWeekData('pakan', 'kg'), borderColor: '#c87d0e', backgroundColor: 'rgba(200,125,14,.1)', tension: 0.4, fill: true, pointBackgroundColor: '#c87d0e', pointRadius: 4 }]);
+
+  var days = last7Days();
+  var biayaData = days.map(function(d) {
+    var sum = 0;
+    db.logs.forEach(function(l) { if (l.date === d) sum += (l.biaya || 0); });
+    return Math.round(sum / 1000);
+  });
+  makeChart('chartBiaya', 'bar', labels,
+    [{ data: biayaData, backgroundColor: '#1a5a8c', borderRadius: 6 }]);
+}
+
+function renderReport() {
+  var days = last7Days();
+  var start = days[0];
+  var logs7 = db.logs.filter(function(l) { return l.date >= start; });
+
+  var telur = 0, mati = 0, biayaPakan = 0, biayaSehat = 0;
+  logs7.forEach(function(l) {
+    if (l.type === 'produksi') telur += (l.telur || 0);
+    mati += (l.mati || 0);
+    if (l.type === 'pakan') biayaPakan += (l.biaya || 0);
+    if (l.type === 'kesehatan') biayaSehat += (l.biaya || 0);
+  });
+
+  document.getElementById('rpt-sub').textContent = fmtDate(days[0]) + ' s/d ' + fmtDate(days[6]);
+  document.getElementById('rpt-telur').textContent = telur + ' butir';
+  document.getElementById('rpt-avg').textContent = Math.round(telur / 7) + ' butir';
+  document.getElementById('rpt-mati').textContent = mati + ' ekor';
+  document.getElementById('rpt-biaya-pakan').textContent = fmtRp(biayaPakan);
+  document.getElementById('rpt-biaya-sehat').textContent = fmtRp(biayaSehat);
+  document.getElementById('rpt-total').textContent = fmtRp(biayaPakan + biayaSehat);
+
+  var ll = document.getElementById('rpt-log-list');
+  if (!logs7.length) {
+    ll.innerHTML = '<div class="empty"><p>Belum ada data minggu ini.</p></div>';
+    return;
+  }
+  var html = '';
+  var show = logs7.slice(0, 10);
+  for (var i = 0; i < show.length; i++) html += logItemHtml(show[i]);
+  ll.innerHTML = html;
+}
+
+// PWA Install
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').style.display = 'flex';
+});
+document.getElementById('install-btn').addEventListener('click', function() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function() {
+    deferredPrompt = null;
+    document.getElementById('install-banner').style.display = 'none';
+    showToast('TernakKu berhasil diinstall!');
+  });
+});
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(function() {});
+}
+
+// Init
+document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+document.getElementById('home-date').textContent = new Date().toLocaleDateString('id-ID', {weekday:'long'});
+var initDate = todayStr();
+document.getElementById('f-tgl-p').value = initDate;
+document.getElementById('f-tgl-pr').value = initDate;
+document.getElementById('f-tgl-k').value = initDate;
+
+renderHome();
+</script>
+</body>
+</html>
